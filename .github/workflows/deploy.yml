@@ -1,4 +1,4 @@
-name: Deploy Static Site to Azure
+name: Deploy Static Site (ZIP) to Azure
 
 on:
   push:
@@ -6,16 +6,19 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Deploy to Azure Web App
+      - name: Zip site content
+        run: zip -r site.zip .
+
+      - name: Deploy to Azure Web App using ZIP
         uses: azure/webapps-deploy@v2
         with:
-          app-name: spotplaylist
+          app-name: playlistconverter
           slot-name: production
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
-          package: .
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: site.zip
