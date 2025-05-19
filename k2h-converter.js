@@ -3,7 +3,7 @@ let sourceToken = null;
 let targetToken = null;
 
 // Spotify App credentials
-const clientId = 'YOUR_SPOTIFY_CLIENT_ID';
+const clientId = 'f3fd2e13bd8046e4b801f01e43b4500b';
 const redirectUri = window.location.origin + '/';
 
 function getLoginUrl(stateTag) {
