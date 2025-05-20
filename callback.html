@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta http-equiv="refresh" content="0;url=/" />
+    <title>Authenticating...</title>
+    <script>
+      window.opener.postMessage(window.location.hash, "*");
+      window.close();
+    </script>
   </head>
   <body>
-    <p>Redirecting back to app...</p>
+    <p>Logging in...</p>
   </body>
 </html>
