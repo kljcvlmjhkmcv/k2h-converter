@@ -25,13 +25,23 @@
         display: none;
         background-color: #121212;
       }
+      .userinfo {
+        margin-top: -10px;
+        margin-bottom: 20px;
+        color: #333;
+        font-size: 15px;
+      }
     </style>
   </head>
   <body>
     <h1>SpotMyPlaylist</h1>
     <p>Start by logging into both Spotify accounts:</p>
     <button id="loginSource">Login as Source</button>
+    <div id="sourceUser" class="userinfo"></div>
+
     <button id="loginTarget">Login as Target</button>
+    <div id="targetUser" class="userinfo"></div>
+
     <br />
     <button id="startTransfer">Start Transfer</button>
 
