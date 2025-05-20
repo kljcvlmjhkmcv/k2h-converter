@@ -65,14 +65,24 @@ window.addEventListener("message", async (event) => {
   });
 
   const data = await response.json();
+  const token = data.access_token;
+
+  const profileRes = await fetch("https://api.spotify.com/v1/me", {
+    headers: { Authorization: "Bearer " + token }
+  });
+  const profile = await profileRes.json();
+  const name = profile.display_name || profile.id;
+
   if (state === "source") {
-    sourceToken = data.access_token;
-    localStorage.setItem("sourceToken", sourceToken);
+    sourceToken = token;
+    localStorage.setItem("sourceToken", token);
     document.getElementById("loginSource").textContent = "✅ Source Connected";
+    document.getElementById("sourceUser").textContent = "👤 " + name;
   } else if (state === "target") {
-    targetToken = data.access_token;
-    localStorage.setItem("targetToken", targetToken);
+    targetToken = token;
+    localStorage.setItem("targetToken", token);
     document.getElementById("loginTarget").textContent = "✅ Target Connected";
+    document.getElementById("targetUser").textContent = "👤 " + name;
   }
 
   if (sourceToken && targetToken) {
@@ -94,8 +104,3 @@ async function generatePKCECodes() {
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   return { verifier, challenge };
 }
-
-document.getElementById("startTransfer").addEventListener("click", () => {
-  // simple forward logic or injection point
-  window.location.href = "transfer.html";
-});
