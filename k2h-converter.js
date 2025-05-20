@@ -4,7 +4,7 @@ let targetToken = null;
 
 // Spotify App credentials
 const clientId = 'f3fd2e13bd8046e4b801f01e43b4500b';
-const redirectUri = window.location.origin + '/';
+const redirectUri = 'https://www.spotmyplaylist.site/callback';
 
 function getLoginUrl(stateTag) {
     const scope = [
