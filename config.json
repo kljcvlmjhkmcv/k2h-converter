@@ -1,4 +1,3 @@
-
 config = {
   "uri": "https://www.spotmyplaylist.site",
   "redirect_uri": "https://www.spotmyplaylist.site/login.html",
