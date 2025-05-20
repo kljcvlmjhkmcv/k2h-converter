@@ -1,27 +1,22 @@
 
-document.getElementById("loginSource").addEventListener("click", () => {
-  window.open("https://k2h-converter.vercel.app/login?state=source", "spotifySourceAuth", "width=500,height=600");
-});
+var token = null;
 
-document.getElementById("loginTarget").addEventListener("click", () => {
-  window.open("https://k2h-converter.vercel.app/login?state=target", "spotifyTargetAuth", "width=500,height=600");
-});
+function loginWithSpotify() {
+  var conf = config;
+  var authUrl = "https://accounts.spotify.com/authorize?" +
+    "client_id=" + conf.client_id +
+    "&redirect_uri=" + encodeURIComponent(conf.redirect_uri) +
+    "&scope=" + encodeURIComponent("playlist-read-private playlist-modify-public playlist-modify-private user-library-read user-library-modify user-follow-read user-follow-modify") +
+    "&response_type=token" +
+    "&show_dialog=true";
 
-window.addEventListener("message", (event) => {
-  const { state, access_token } = event.data;
-  if (state === "source") {
-    localStorage.setItem("sourceToken", access_token);
-    document.getElementById("loginSource").textContent = "✅ Source Connected";
-  } else if (state === "target") {
-    localStorage.setItem("targetToken", access_token);
-    document.getElementById("loginTarget").textContent = "✅ Target Connected";
-  }
+  window.open(authUrl, "spotifyAuth", "width=500,height=600");
+}
 
-  if (localStorage.getItem("sourceToken") && localStorage.getItem("targetToken")) {
-    document.getElementById("startTransfer").style.display = "inline-block";
-  }
-});
-
-document.getElementById("startTransfer").addEventListener("click", () => {
-  window.location.href = "transfer.html";
+window.addEventListener("message", function (event) {
+  if (event.origin !== config.uri) return;
+  token = event.data;
+  localStorage.setItem("access_token", token);
+  document.getElementById("loginStatus").textContent = "✅ Connected";
+  document.getElementById("startTransfer").style.display = "inline-block";
 });
