@@ -1,14 +1,40 @@
 
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <title>SpotMyPlaylist PKCE</title>
-  <script type="module" src="script.js"></script>
-</head>
-<body style="font-family: sans-serif; text-align: center; padding-top: 50px;">
-  <h1>SpotMyPlaylist</h1>
-  <p>Transfer your Spotify data securely using PKCE.</p>
-  <button id="login">Login with Spotify</button>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>SpotMyPlaylist Classic</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #f5f5f5;
+        text-align: center;
+        padding-top: 80px;
+      }
+      button {
+        font-size: 18px;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 30px;
+        background-color: #1db954;
+        color: white;
+        cursor: pointer;
+        margin: 20px;
+      }
+      #startTransfer {
+        display: none;
+        background-color: #121212;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>SpotMyPlaylist</h1>
+    <p>Start by logging into both Spotify accounts:</p>
+    <button id="loginSource">Login as Source</button>
+    <button id="loginTarget">Login as Target</button>
+    <br />
+    <button id="startTransfer">Start Transfer</button>
+
+    <script type="module" src="script.js"></script>
+  </body>
 </html>
