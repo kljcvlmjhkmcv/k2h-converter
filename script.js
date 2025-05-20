@@ -14,9 +14,10 @@ function loginWithSpotify() {
 }
 
 window.addEventListener("message", function (event) {
-  if (event.origin !== config.uri) return;
-  token = event.data;
-  localStorage.setItem("access_token", token);
-  document.getElementById("loginStatus").textContent = "✅ Connected";
-  document.getElementById("startTransfer").style.display = "inline-block";
+  if (typeof event.data === "string" && event.data.length > 20) {
+    token = event.data;
+    localStorage.setItem("access_token", token);
+    document.getElementById("loginStatus").textContent = "✅ Connected";
+    document.getElementById("startTransfer").style.display = "inline-block";
+  }
 });
