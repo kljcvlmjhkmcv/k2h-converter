@@ -246,3 +246,36 @@ async function transferSavedPodcasts(sourceToken, targetToken) {
         url = data.next;
     }
 }
+
+
+let logger = console.log;
+export function injectTokens(src, tgt, logFn) {
+    sourceToken = src;
+    targetToken = tgt;
+    if (typeof logFn === "function") logger = logFn;
+}
+
+export async function startTransfer() {
+    logger("🔄 Fetching playlists from source...");
+    const playlists = await fetchPlaylists(sourceToken);
+    logger("🎧 Total playlists found: " + playlists.length);
+    for (const pl of playlists) {
+        const isOwner = pl.owner && pl.owner.id && pl.owner.id === await getUserId(sourceToken);
+        if (isOwner) {
+            logger("🟢 Creating playlist: " + pl.name);
+            const newPl = await createPlaylist(pl, targetToken);
+            if (pl.images && pl.images.length > 0) {
+                await uploadPlaylistImage(newPl.id, pl.images[0].url, targetToken);
+            }
+            await copyTracks(pl.id, newPl.id, sourceToken, targetToken);
+        } else {
+            logger("🔵 Following playlist: " + pl.name);
+            await followPlaylist(pl.id, targetToken);
+        }
+    }
+    logger("✅ Playlists done.");
+    await transferLikedSongs(sourceToken, targetToken);
+    await transferSavedAlbums(sourceToken, targetToken);
+    await transferSavedPodcasts(sourceToken, targetToken);
+    logger("🚀 All transfers completed.");
+}
