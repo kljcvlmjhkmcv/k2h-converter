@@ -13,7 +13,7 @@
 <body>
   <h2>Ready to Transfer 🎶</h2>
   <p>Click the button below to begin transferring playlists, liked songs, albums, and podcasts from source to target account.</p>
-  <button onclick="start()">Start Transfer</button>
+  <button id="startBtn">Start Transfer</button>
   <div id="log"></div>
 
   <script type="module">
@@ -24,21 +24,21 @@
       logBox.textContent += msg + '\n';
     }
 
-    window.start = async function () {
+    document.getElementById('startBtn').addEventListener('click', async () => {
       const source = localStorage.getItem('sourceToken');
       const target = localStorage.getItem('targetToken');
       if (!source || !target) {
         log("❌ Missing tokens. Please authenticate both accounts.");
         return;
       }
-      injectTokens(source, target, log); // inject before running
+      injectTokens(source, target, log);
       try {
         await startTransfer();
         log("✅ Transfer complete!");
       } catch (err) {
         log("❌ Error: " + err.message);
       }
-    }
+    });
   </script>
 </body>
 </html>
