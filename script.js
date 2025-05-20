@@ -65,15 +65,13 @@ window.addEventListener("message", async (event) => {
   });
 
   const data = await response.json();
-  const token = data.access_token;
-
   if (state === "source") {
-    sourceToken = token;
-    localStorage.setItem("sourceToken", token);
+    sourceToken = data.access_token;
+    localStorage.setItem("sourceToken", sourceToken);
     document.getElementById("loginSource").textContent = "✅ Source Connected";
   } else if (state === "target") {
-    targetToken = token;
-    localStorage.setItem("targetToken", token);
+    targetToken = data.access_token;
+    localStorage.setItem("targetToken", targetToken);
     document.getElementById("loginTarget").textContent = "✅ Target Connected";
   }
 
@@ -96,3 +94,8 @@ async function generatePKCECodes() {
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   return { verifier, challenge };
 }
+
+document.getElementById("startTransfer").addEventListener("click", () => {
+  // simple forward logic or injection point
+  window.location.href = "transfer.html";
+});
