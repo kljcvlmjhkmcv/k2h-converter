@@ -1,7 +1,8 @@
-var config = {
-  client_id: "f3fd2e13bd8046e4b801f01e43b4500b",
-  redirect_uri: "https://www.spotmyplaylist.site/login.html",
-  uri: "https://www.spotmyplaylist.site",
-  slowdown_import: 100,
-  slowdown_export: 100
+
+config = {
+  "uri": "https://www.spotmyplaylist.site",
+  "redirect_uri": "https://www.spotmyplaylist.site/login.html",
+  "client_id": "f3fd2e13bd8046e4b801f01e43b4500b",
+  "slowdown_import": 100,
+  "slowdown_export": 100
 };
