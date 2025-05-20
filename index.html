@@ -13,40 +13,41 @@
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
 
-      if (code) {
-        const clientId = "f3fd2e13bd8046e4b801f01e43b4500b";
-        const clientSecret = "996c6b33b83a4e928639fbd26bff773b";
-        const redirectUri = "https://www.spotmyplaylist.site/";
+      // ✅ لا تحاول تسوي أي شي إذا ما فيه code
+      if (!code) return;
 
-        const body = new URLSearchParams({
-          grant_type: "authorization_code",
-          code,
-          redirect_uri: redirectUri,
-          client_id: clientId
+      const clientId = "f3fd2e13bd8046e4b801f01e43b4500b";
+      const clientSecret = "996c6b33b83a4e928639fbd26bff773b";
+      const redirectUri = "https://www.spotmyplaylist.site/";
+
+      const body = new URLSearchParams({
+        grant_type: "authorization_code",
+        code,
+        redirect_uri: redirectUri,
+        client_id: clientId
+      });
+
+      try {
+        const response = await fetch("https://accounts.spotify.com/api/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: "Basic " + btoa(clientId + ":" + clientSecret)
+          },
+          body: body
         });
 
-        try {
-          const response = await fetch("https://accounts.spotify.com/api/token", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Authorization: "Basic " + btoa(clientId + ":" + clientSecret)
-            },
-            body: body
-          });
-
-          const data = await response.json();
-          if (data.access_token) {
-            localStorage.setItem("access_token", data.access_token);
-            window.history.replaceState({}, document.title, "/");
-            window.location.reload();
-          } else {
-            console.error("Token exchange failed", data);
-            document.body.innerHTML += "<p>فشل تسجيل الدخول. حاول مجددًا.</p>";
-          }
-        } catch (err) {
-          console.error("Error during token fetch:", err);
+        const data = await response.json();
+        if (data.access_token) {
+          localStorage.setItem("access_token", data.access_token);
+          window.history.replaceState({}, document.title, "/");
+          window.location.reload();
+        } else {
+          console.error("Token exchange failed", data);
+          document.body.innerHTML += "<p>فشل تسجيل الدخول. حاول مجددًا.</p>";
         }
+      } catch (err) {
+        console.error("Error during token fetch:", err);
       }
     }
 
