@@ -17,7 +17,7 @@ const utils = {
 		let code_challenge = btoa(String.fromCharCode(...new Uint8Array(hashed))).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
 
 		localStorage.setItem('code_verifier', code_verifier) // save the random string secret
-		location = "https://accounts.spotify.com/authorize?client_id=d99b082b01d74d61a100c9a0e056380b" +
+		location = "https://accounts.spotify.com/authorize?client_id=f3fd2e13bd8046e4b801f01e43b4500b" +
 			"&redirect_uri=" + encodeURIComponent(location.origin + location.pathname) +
 			"&scope=playlist-read-private%20playlist-read-collaborative%20user-library-read" + // access to particular scopes of info defined here
 			"&response_type=code&code_challenge_method=S256&code_challenge=" + code_challenge
