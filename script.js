@@ -67,22 +67,14 @@ window.addEventListener("message", async (event) => {
   const data = await response.json();
   const token = data.access_token;
 
-  const profileRes = await fetch("https://api.spotify.com/v1/me", {
-    headers: { Authorization: "Bearer " + token }
-  });
-  const profile = await profileRes.json();
-  const name = profile.display_name || profile.id;
-
   if (state === "source") {
     sourceToken = token;
     localStorage.setItem("sourceToken", token);
     document.getElementById("loginSource").textContent = "✅ Source Connected";
-    document.getElementById("sourceUser").textContent = "👤 " + name;
   } else if (state === "target") {
     targetToken = token;
     localStorage.setItem("targetToken", token);
     document.getElementById("loginTarget").textContent = "✅ Target Connected";
-    document.getElementById("targetUser").textContent = "👤 " + name;
   }
 
   if (sourceToken && targetToken) {
