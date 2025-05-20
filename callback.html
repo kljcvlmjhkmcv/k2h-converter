@@ -2,38 +2,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Spotify Auth Callback</title>
+  <title>Authenticating...</title>
 </head>
 <body>
-  <h2>Authenticating...</h2>
   <script>
-    async function getAccessToken() {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get('code');
-      const verifier = localStorage.getItem('code_verifier');
-
-      const body = new URLSearchParams({
-        client_id: 'f3fd2e13bd8046e4b801f01e43b4500b',
-        grant_type: 'authorization_code',
-        code: code,
-        redirect_uri: 'https://www.spotmyplaylist.site/callback',
-        code_verifier: verifier
-      });
-
-      const response = await fetch('https://accounts.spotify.com/api/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: body
-      });
-
-      const data = await response.json();
-      console.log('✅ Access Token:', data.access_token);
-      localStorage.setItem('access_token', data.access_token);
-
-      document.body.innerHTML = '<h2>✅ Authenticated! You can close this tab.</h2>';
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const state = params.get("state");
+    if (window.opener) {
+      window.opener.postMessage({ code, state }, "*");
+      window.close();
     }
-
-    getAccessToken();
   </script>
 </body>
 </html>
