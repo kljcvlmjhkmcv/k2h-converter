@@ -1,13 +1,11 @@
-
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>SpotMyPlaylist</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotMyPlaylist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
     * {
       box-sizing: border-box;
     }
@@ -91,25 +89,30 @@
   </style>
 </head>
 <body>
-<div class="card">
-<h1>SpotMyPlaylist</h1>
-<p class="subtitle">Transfer playlists between Spotify accounts easily</p>
-<div class="status">
-<div>Source: <span id="sourceStatus">Not Connected</span></div>
-<div>Destination: <span id="destStatus">Not Connected</span></div>
-</div>
-<button id="sourceLoginBtn">Login as Source Account</button>
-<button id="destLoginBtn">Login as Destination Account</button>
-<button disabled="" id="transferBtn">Transfer Playlists</button>
-<div class="progress-wrapper">
-<progress id="transferProgressBar" max="100" value="0"></progress>
-<div class="info" id="transferStatus">Waiting for login...</div>
-<div class="info" id="transferPercentage">0%</div>
-</div>
-</div>
-<script>const clientId = "f3fd2e13bd8046e4b801f01e43b4500b";
+  <div class="card">
+    <h1>SpotMyPlaylist</h1>
+    <p class="subtitle">Transfer playlists between Spotify accounts easily</p>
+
+    <div class="status">
+      <div>Source: <span id="sourceStatus">Not Connected</span></div>
+      <div>Destination: <span id="destStatus">Not Connected</span></div>
+    </div>
+
+    <button id="sourceLoginBtn">Login as Source Account</button>
+    <button id="destLoginBtn">Login as Destination Account</button>
+    <button id="transferBtn" disabled>Transfer Playlists</button>
+
+    <div class="progress-wrapper">
+      <progress id="transferProgressBar" value="0" max="100"></progress>
+      <div class="info" id="transferStatus">Waiting for login...</div>
+      <div class="info" id="transferPercentage">0%</div>
+    </div>
+  </div>
+
+<script>
+const clientId = "f3fd2e13bd8046e4b801f01e43b4500b";
 const redirectUri = "https://www.spotmyplaylist.site/";
-const scopes = "playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public";
+const scopes = "playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public user-library-read user-follow-read";
 
 let accessToken1 = null;
 let accessToken2 = null;
@@ -207,8 +210,6 @@ function checkTransferReady() {
   }
 }
 
-
-
 window.onload = function () {
   const params = new URLSearchParams(window.location.search);
   const code = params.get("code");
@@ -223,279 +224,13 @@ window.onload = function () {
 
   document.getElementById("sourceLoginBtn").onclick = () => loginSpotify("source");
   document.getElementById("destLoginBtn").onclick = () => loginSpotify("target");
-  document.getElementById("transferBtn").onclick = () => transferPlaylists();
+  document.getElementById("transferBtn").onclick = () => {
+    const script = document.createElement("script");
+    script.src = "transfer.js";
+    document.body.appendChild(script);
+  };
 };
-
-async function transferPlaylists() {
-  if (!accessToken1 || !accessToken2) return alert("Please connect both accounts first.");
-  const status = document.getElementById("transferStatus");
-  const bar = document.getElementById("transferProgressBar");
-  const percent = document.getElementById("transferPercentage");
-
-  status.textContent = "Starting transfer...";
-  bar.value = 0;
-  percent.textContent = "0%";
-
-  // Transfer playlists
-  await transferUserPlaylists();
-
-  // Transfer saved tracks
-  await transferSavedTracks();
-
-  // Transfer followed artists
-  await transferFollowedArtists();
-
-  // Transfer saved albums
-  await transferSavedAlbums();
-
-  // Transfer saved shows (podcasts)
-  await transferSavedShows();
-
-  status.textContent = "✅ Transfer complete!";
-}
-
-async function transferUserPlaylists() {
-  const status = document.getElementById("transferStatus");
-  const bar = document.getElementById("transferProgressBar");
-  const percent = document.getElementById("transferPercentage");
-
-  status.textContent = "Fetching playlists...";
-  
-  let playlists = [];
-  let url = "https://api.spotify.com/v1/me/playlists?limit=50";
-  
-  while (url) {
-    const res = await fetch(url, {
-      headers: { Authorization: "Bearer " + accessToken1 }
-    });
-    const data = await res.json();
-    playlists = playlists.concat(data.items);
-    url = data.next;
-  }
-
-  bar.max = playlists.length;
-  bar.value = 0;
-  percent.textContent = "0%";
-
-  for (let i = 0; i < playlists.length; i++) {
-    const pl = playlists[i];
-    const isOwner = pl.owner.id === userId1;
-    
-    status.textContent = isOwner ? `Transferring (owner): ${pl.name}` : `Following: ${pl.name}`;
-
-    if (isOwner) {
-      // Transfer owned playlists
-      const newPlaylist = await createPlaylist(pl);
-      if (pl.images.length > 0) {
-        await uploadPlaylistImage(newPlaylist.id, pl.images[0].url);
-      }
-      if (pl.tracks.total > 0) {
-        await transferPlaylistTracks(pl.id, newPlaylist.id);
-      }
-    } else {
-      // Follow non-owned playlists
-      await followPlaylist(pl.id);
-    }
-
-    bar.value = i + 1;
-    percent.textContent = Math.round(((i + 1) / playlists.length) * 100) + "%";
-    await new Promise(r => setTimeout(r, 300));
-  }
-}
-
-async function transferPlaylistTracks(sourceId, targetId) {
-  let tracks = [];
-  let url = `https://api.spotify.com/v1/playlists/${sourceId}/tracks?limit=100`;
-  
-  while (url) {
-    const res = await fetch(url, {
-      headers: { Authorization: "Bearer " + accessToken1 }
-    });
-    const data = await res.json();
-    tracks = tracks.concat(data.items);
-    url = data.next;
-  }
-
-  const trackUris = tracks.map(item => item.track.uri).filter(uri => uri);
-  
-  // Add tracks in batches of 100 (Spotify limit)
-  for (let i = 0; i < trackUris.length; i += 100) {
-    const batch = trackUris.slice(i, i + 100);
-    await fetch(`https://api.spotify.com/v1/playlists/${targetId}/tracks`, {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + accessToken2",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        uris: batch,
-        position: i
-      })
-    });
-    await new Promise(r => setTimeout(r, 300));
-  }
-}
-
-async function transferSavedTracks() {
-  const status = document.getElementById("transferStatus");
-  status.textContent = "Transferring saved tracks...";
-  
-  let tracks = [];
-  let url = "https://api.spotify.com/v1/me/tracks?limit=50";
-  
-  while (url) {
-    const res = await fetch(url, {
-      headers: { Authorization: "Bearer " + accessToken1 }
-    });
-    const data = await res.json();
-    tracks = tracks.concat(data.items);
-    url = data.next;
-  }
-
-  const trackUris = tracks.map(item => item.track.uri).filter(uri => uri);
-  
-  // Add tracks in batches of 50 (Spotify limit for this endpoint)
-  for (let i = 0; i < trackUris.length; i += 50) {
-    const batch = trackUris.slice(i, i + 50);
-    await fetch("https://api.spotify.com/v1/me/tracks", {
-      method: "PUT",
-      headers: {
-        Authorization: "Bearer " + accessToken2,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        ids: batch.map(uri => uri.split(':')[2])
-      })
-    });
-    await new Promise(r => setTimeout(r, 300));
-  }
-}
-
-async function transferFollowedArtists() {
-  const status = document.getElementById("transferStatus");
-  status.textContent = "Transferring followed artists...";
-  
-  let artists = [];
-  let url = "https://api.spotify.com/v1/me/following?type=artist&limit=50";
-  
-  while (url) {
-    const res = await fetch(url, {
-      headers: { Authorization: "Bearer " + accessToken1 }
-    });
-    const data = await res.json();
-    artists = artists.concat(data.artists.items);
-    url = data.artists.next;
-  }
-
-  const artistIds = artists.map(artist => artist.id).filter(id => id);
-  
-  // Follow artists in batches of 50 (Spotify limit)
-  for (let i = 0; i < artistIds.length; i += 50) {
-    const batch = artistIds.slice(i, i + 50);
-    await fetch("https://api.spotify.com/v1/me/following", {
-      method: "PUT",
-      headers: {
-        Authorization: "Bearer " + accessToken2,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        type: "artist",
-        ids: batch
-      })
-    });
-    await new Promise(r => setTimeout(r, 300));
-  }
-}
-
-async function transferSavedAlbums() {
-  const status = document.getElementById("transferStatus");
-  status.textContent = "Transferring saved albums...";
-  
-  let albums = [];
-  let url = "https://api.spotify.com/v1/me/albums?limit=50";
-  
-  while (url) {
-    const res = await fetch(url, {
-      headers: { Authorization: "Bearer " + accessToken1 }
-    });
-    const data = await res.json();
-    albums = albums.concat(data.items);
-    url = data.next;
-  }
-
-  const albumIds = albums.map(item => item.album.id).filter(id => id);
-  
-  // Save albums in batches of 50 (Spotify limit)
-  for (let i = 0; i < albumIds.length; i += 50) {
-    const batch = albumIds.slice(i, i + 50);
-    await fetch("https://api.spotify.com/v1/me/albums", {
-      method: "PUT",
-      headers: {
-        Authorization: "Bearer " + accessToken2,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        ids: batch
-      })
-    });
-    await new Promise(r => setTimeout(r, 300));
-  }
-}
-
-async function transferSavedShows() {
-  const status = document.getElementById("transferStatus");
-  status.textContent = "Transferring saved podcasts...";
-  
-  let shows = [];
-  let url = "https://api.spotify.com/v1/me/shows?limit=50";
-  
-  while (url) {
-    const res = await fetch(url, {
-      headers: { Authorization: "Bearer " + accessToken1 }
-    });
-    const data = await res.json();
-    shows = shows.concat(data.items);
-    url = data.next;
-  }
-
-  const showIds = shows.map(item => item.show.id).filter(id => id);
-  
-  // Save shows in batches of 50 (Spotify limit)
-  for (let i = 0; i < showIds.length; i += 50) {
-    const batch = showIds.slice(i, i + 50);
-    await fetch("https://api.spotify.com/v1/me/shows", {
-      method: "PUT",
-      headers: {
-        Authorization: "Bearer " + accessToken2,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        ids: batch
-      })
-    });
-    await new Promise(r => setTimeout(r, 300));
-  }
-}
-
-
-async function transferPlaylists() {
-  if (!accessToken1 || !accessToken2) return alert("Please connect both accounts first.");
-  const status = document.getElementById("transferStatus");
-  const bar = document.getElementById("transferProgressBar");
-  const percent = document.getElementById("transferPercentage");
-
-  status.textContent = "Starting transfer...";
-  bar.value = 0;
-  percent.textContent = "0%";
-
-  await transferUserPlaylists();
-  await transferSavedTracks();
-  await transferFollowedArtists();
-  await transferSavedAlbums();
-  await transferSavedShows();
-
-  status.textContent = "✅ Transfer complete!";
-}
 </script>
+
 </body>
 </html>
