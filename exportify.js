@@ -296,7 +296,7 @@ onload = async () => {
 		history.replaceState({}, '', '/') // get rid of the ugly code string from the browser bar
 
 		let response = await fetch("https://accounts.spotify.com/api/token", { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-			body: new URLSearchParams({client_id: "d99b082b01d74d61a100c9a0e056380b", grant_type: 'authorization_code', code: code, redirect_uri: "https://www.spotmyplaylist.site/callback",
+			body: new URLSearchParams({client_id: "f3fd2e13bd8046e4b801f01e43b4500b", grant_type: 'authorization_code', code: code, redirect_uri: "https://www.spotmyplaylist.site/",
 				code_verifier: localStorage.getItem('code_verifier')}) }) // POST to get the access token, then fish it out of the response body
 		localStorage.setItem('access_token', (await response.json()).access_token) // https://stackoverflow.com/questions/59555534/why-is-json-asynchronous
 		localStorage.setItem('access_token_timestamp', Date.now())
