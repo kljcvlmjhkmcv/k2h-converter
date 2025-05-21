@@ -318,29 +318,32 @@ function tryRestoreTokens() {
     accessToken1 = localStorage.getItem("access_token_source");
     accessToken2 = localStorage.getItem("access_token_target");
 
-    if (accessToken1) document.getElementById("login-source").innerText = "✅ حساب المصدر متصل";
-    if (accessToken2) document.getElementById("login-target").innerText = "✅ حساب الوجهة متصل";
+    if (accessToken1) document.getElementById("sourceLoginBtn").innerText = "✅ مصدر متصل";
+    if (accessToken2) document.getElementById("targetLoginBtn").innerText = "✅ وجهة متصلة";
 }
 
 async function transferPlaylists() {
     if (!accessToken1 || !accessToken2) return alert("سجل دخول بالحسابين أولاً.");
 
-    document.getElementById("progress").value = 0;
-    document.getElementById("progress").max = 1;
-    document.getElementById("status").innerText = "جلب البلايليست...";
+    const status = document.getElementById("transferStatus");
+    const progress = document.getElementById("progressBar");
+
+    status.innerText = "جاري جلب البلايليست...";
+    progress.value = 0;
+    progress.max = 1;
 
     const res = await fetch("https://api.spotify.com/v1/me/playlists?limit=50", {
         headers: { Authorization: "Bearer " + accessToken1 }
     });
 
     const playlists = (await res.json()).items;
-    document.getElementById("progress").max = playlists.length;
+    progress.max = playlists.length;
 
     for (let i = 0; i < playlists.length; i++) {
         const pl = playlists[i];
-        document.getElementById("status").innerText = `نقل: ${pl.name}`;
+        status.innerText = `نقل: ${pl.name}`;
 
-        const create = await fetch("https://api.spotify.com/v1/users/me/playlists", {
+        await fetch("https://api.spotify.com/v1/me/playlists", {
             method: "POST",
             headers: {
                 Authorization: "Bearer " + accessToken2,
@@ -349,11 +352,11 @@ async function transferPlaylists() {
             body: JSON.stringify({ name: pl.name + " 🎵", public: false })
         });
 
-        document.getElementById("progress").value = i + 1;
-        await new Promise(r => setTimeout(r, 400)); // for smoother progress
+        progress.value = i + 1;
+        await new Promise(r => setTimeout(r, 300));
     }
 
-    document.getElementById("status").innerText = "✅ تم النقل!";
+    status.innerText = "✅ تم النقل بنجاح!";
 }
 
 window.onload = function () {
@@ -368,9 +371,9 @@ window.onload = function () {
         tryRestoreTokens();
     }
 
-    document.getElementById("login-source").onclick = () => loginSpotify("source");
-    document.getElementById("login-target").onclick = () => loginSpotify("target");
-    document.getElementById("transfer").onclick = () => transferPlaylists();
+    document.getElementById("sourceLoginBtn").onclick = () => loginSpotify("source");
+    document.getElementById("targetLoginBtn").onclick = () => loginSpotify("target");
+    document.getElementById("startTransferBtn").onclick = () => transferPlaylists();
 };
 </script>
 
