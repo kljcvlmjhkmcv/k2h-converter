@@ -130,7 +130,7 @@
             Authorization: "Bearer " + accessToken2,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(ids)
+          body: JSON.stringify({ ids })
         });
       }
     } catch (e) {
@@ -157,7 +157,7 @@
             Authorization: "Bearer " + accessToken2,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(ids)
+          body: JSON.stringify({ ids })
         });
       }
     } catch (e) {
@@ -184,7 +184,7 @@
             Authorization: "Bearer " + accessToken2,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(ids)
+          body: JSON.stringify({ ids })
         });
       }
     } catch (e) {
@@ -211,7 +211,7 @@
             Authorization: "Bearer " + accessToken2,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(ids)
+          body: JSON.stringify({ ids })
         });
       }
     } catch (e) {
