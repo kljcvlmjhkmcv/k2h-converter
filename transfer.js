@@ -1,3 +1,4 @@
+
 (async function transferAll() {
   const accessToken1 = localStorage.getItem("access_token_source");
   const accessToken2 = localStorage.getItem("access_token_target");
@@ -130,7 +131,7 @@
             Authorization: "Bearer " + accessToken2,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(ids)
+          body: JSON.stringify({ ids })
         });
       }
     } catch (e) {
@@ -152,13 +153,12 @@
       for (let i = 0; i < albums.length; i += 50) {
         const ids = albums.slice(i, i + 50).map(a => a.album?.id).filter(Boolean);
         await fetch("https://api.spotify.com/v1/me/albums", {
-      method: "PUT",
           method: "PUT",
           headers: {
             Authorization: "Bearer " + accessToken2,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(ids)
+          body: JSON.stringify({ ids })
         });
       }
     } catch (e) {
@@ -169,24 +169,24 @@
   async function transferArtists() {
     try {
       status.textContent = "Transferring followed artists...";
-      let artists = []; document.getElementById('artistCount').textContent = '...';
+      let artists = [];
       let url = "https://api.spotify.com/v1/me/following?type=artist&limit=50";
       while (url) {
         const res = await fetch(url, { headers: { Authorization: "Bearer " + accessToken1 } });
         const data = await res.json();
         if (data.artists?.items) artists = artists.concat(data.artists.items);
-        url = data.artists.next;
+        url = data.artists?.next;
       }
-      document.getElementById('artistCount').textContent = artists.length;
-    for (let i = 0; i < artists.length; i += 50) {
+      document.getElementById("artistCount").textContent = artists.length;
+      for (let i = 0; i < artists.length; i += 50) {
         const ids = artists.slice(i, i + 50).map(a => a.id);
-        await fetch("https://api.spotify.com/v1/me/following", {
+        await fetch("https://api.spotify.com/v1/me/following?type=artist", {
           method: "PUT",
           headers: {
             Authorization: "Bearer " + accessToken2,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(ids)
+          body: JSON.stringify({ ids })
         });
       }
     } catch (e) {
@@ -213,7 +213,7 @@
             Authorization: "Bearer " + accessToken2,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(ids)
+          body: JSON.stringify({ ids })
         });
       }
     } catch (e) {
@@ -221,13 +221,11 @@
     }
   }
 
-  if (document.getElementById('optPlaylists').checked) await transferPlaylists();
-  if (document.getElementById('optLiked').checked) await transferLikedTracks();
-  if (document.getElementById('optAlbums').checked) await transferAlbums();
-  
-if (document.getElementById('optArtists').checked) await transferArtists();
-
-  if (document.getElementById('optPodcasts').checked) await transferPodcasts();
+  if (document.getElementById("optPlaylists").checked) await transferPlaylists();
+  if (document.getElementById("optLiked").checked) await transferLikedTracks();
+  if (document.getElementById("optAlbums").checked) await transferAlbums();
+  if (document.getElementById("optArtists").checked) await transferArtists();
+  if (document.getElementById("optPodcasts").checked) await transferPodcasts();
 
   status.textContent = "✅ All transfers complete!";
 })();
