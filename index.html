@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>SpotMyPlaylist BAZAAT !!!</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotMyPlaylist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
     * {
       box-sizing: border-box;
     }
@@ -90,22 +89,26 @@
   </style>
 </head>
 <body>
-<div class="card">
-<h1>SpotMyPlaylist</h1>
-<p class="subtitle">Transfer playlists between Spotify accounts easily</p>
-<div class="status">
-<div>Source: <span id="sourceStatus">Not Connected</span></div>
-<div>Destination: <span id="destStatus">Not Connected</span></div>
-</div>
-<button id="sourceLoginBtn">Login as Source Account</button>
-<button id="destLoginBtn">Login as Destination Account</button>
-<button disabled="" id="transferBtn">Transfer Playlists</button>
-<div class="progress-wrapper">
-<progress id="transferProgressBar" max="100" value="0"></progress>
-<div class="info" id="transferStatus">Waiting for login...</div>
-<div class="info" id="transferPercentage">0%</div>
-</div>
-</div>
+  <div class="card">
+    <h1>SpotMyPlaylist</h1>
+    <p class="subtitle">Transfer playlists between Spotify accounts easily</p>
+
+    <div class="status">
+      <div>Source: <span id="sourceStatus">Not Connected</span></div>
+      <div>Destination: <span id="destStatus">Not Connected</span></div>
+    </div>
+
+    <button id="sourceLoginBtn">Login as Source Account</button>
+    <button id="destLoginBtn">Login as Destination Account</button>
+    <button id="transferBtn" disabled>Transfer Playlists</button>
+
+    <div class="progress-wrapper">
+      <progress id="transferProgressBar" value="0" max="100"></progress>
+      <div class="info" id="transferStatus">Waiting for login...</div>
+      <div class="info" id="transferPercentage">0%</div>
+    </div>
+  </div>
+
 <script>
 const clientId = "f3fd2e13bd8046e4b801f01e43b4500b";
 const redirectUri = "https://www.spotmyplaylist.site/";
@@ -549,11 +552,7 @@ window.onload = function () {
   document.getElementById("destLoginBtn").onclick = () => loginSpotify("target");
   document.getElementById("transferBtn").onclick = () => transferPlaylists();
 };
+</script>
 
-
-
-    document.getElementById("sourceLoginBtn").onclick = () => loginSpotify("source");
-    document.getElementById("destLoginBtn").onclick = () => loginSpotify("target");
-    </script>
 </body>
 </html>
