@@ -310,9 +310,9 @@ async function exchangeToken(code, accountLabel) {
     if (data.access_token) {
         localStorage.setItem("access_token_" + accountLabel, data.access_token);
         if (accountLabel === "source") {
-            document.getElementById("sourceLoginBtn").innerText = "✅ Source Account Connected";
+            
         } else {
-            document.getElementById("destLoginBtn").innerText = "✅ Destination Account Connected";
+            
         }
         window.history.replaceState({}, document.title, "/");
     }
@@ -323,10 +323,10 @@ function tryRestoreTokens() {
     accessToken2 = localStorage.getItem("access_token_target");
 
     if (accessToken1) {
-        document.getElementById("sourceLoginBtn").innerText = "✅ Source Account Connected";
+        
     }
     if (accessToken2) {
-        document.getElementById("destLoginBtn").innerText = "✅ Destination Account Connected";
+        
     }
 }
 
