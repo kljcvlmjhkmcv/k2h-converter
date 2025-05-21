@@ -130,7 +130,7 @@
             Authorization: "Bearer " + accessToken2,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ ids })
+          body: JSON.stringify(ids)
         });
       }
     } catch (e) {
@@ -157,7 +157,7 @@
             Authorization: "Bearer " + accessToken2,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ ids })
+          body: JSON.stringify(ids)
         });
       }
     } catch (e) {
@@ -173,18 +173,19 @@
       while (url) {
         const res = await fetch(url, { headers: { Authorization: "Bearer " + accessToken1 } });
         const data = await res.json();
-        if (data.artists?.items) artists = artists.concat(data.artists.items); document.getElementById('artistCount').textContent = artists.length;
+        if (data.artists?.items) artists = artists.concat(data.artists.items);
         url = data.artists.next;
       }
-      for (let i = 0; i < artists.length; i += 50) {
+      document.getElementById('artistCount').textContent = artists.length;
+    for (let i = 0; i < artists.length; i += 50) {
         const ids = artists.slice(i, i + 50).map(a => a.id);
-        await fetch("https://api.spotify.com/v1/me/following?type=artist", {
+        await fetch("https://api.spotify.com/v1/me/following", {
           method: "PUT",
           headers: {
             Authorization: "Bearer " + accessToken2,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ ids })
+          body: JSON.stringify(ids)
         });
       }
     } catch (e) {
@@ -211,7 +212,7 @@
             Authorization: "Bearer " + accessToken2,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ ids })
+          body: JSON.stringify(ids)
         });
       }
     } catch (e) {
