@@ -309,8 +309,12 @@ async function exchangeToken(code, accountLabel) {
     const data = await response.json();
     if (data.access_token) {
         localStorage.setItem("access_token_" + accountLabel, data.access_token);
+        if (accountLabel === "source") {
+            document.getElementById("sourceLoginBtn").innerText = "✅ Source Account Connected";
+        } else {
+            document.getElementById("destLoginBtn").innerText = "✅ Destination Account Connected";
+        }
         window.history.replaceState({}, document.title, "/");
-        window.location.reload();
     }
 }
 
@@ -318,30 +322,35 @@ function tryRestoreTokens() {
     accessToken1 = localStorage.getItem("access_token_source");
     accessToken2 = localStorage.getItem("access_token_target");
 
-    if (accessToken1) document.getElementById("sourceLoginBtn").innerText = "✅ مصدر متصل";
-    if (accessToken2) document.getElementById("targetLoginBtn").innerText = "✅ وجهة متصلة";
+    if (accessToken1) {
+        document.getElementById("sourceLoginBtn").innerText = "✅ Source Account Connected";
+    }
+    if (accessToken2) {
+        document.getElementById("destLoginBtn").innerText = "✅ Destination Account Connected";
+    }
 }
 
 async function transferPlaylists() {
-    if (!accessToken1 || !accessToken2) return alert("سجل دخول بالحسابين أولاً.");
+    if (!accessToken1 || !accessToken2) return alert("Please connect both accounts first.");
 
     const status = document.getElementById("transferStatus");
-    const progress = document.getElementById("progressBar");
+    const progressBar = document.getElementById("transferProgressBar");
+    const percentText = document.getElementById("transferPercentage");
 
-    status.innerText = "جاري جلب البلايليست...";
-    progress.value = 0;
-    progress.max = 1;
+    status.innerText = "Fetching playlists...";
+    progressBar.style.width = "0%";
+    percentText.innerText = "0%";
 
     const res = await fetch("https://api.spotify.com/v1/me/playlists?limit=50", {
         headers: { Authorization: "Bearer " + accessToken1 }
     });
 
     const playlists = (await res.json()).items;
-    progress.max = playlists.length;
+    const total = playlists.length;
 
-    for (let i = 0; i < playlists.length; i++) {
+    for (let i = 0; i < total; i++) {
         const pl = playlists[i];
-        status.innerText = `نقل: ${pl.name}`;
+        status.innerText = `Transferring: ${pl.name}`;
 
         await fetch("https://api.spotify.com/v1/me/playlists", {
             method: "POST",
@@ -352,11 +361,13 @@ async function transferPlaylists() {
             body: JSON.stringify({ name: pl.name + " 🎵", public: false })
         });
 
-        progress.value = i + 1;
+        const progress = Math.round(((i + 1) / total) * 100);
+        progressBar.style.width = progress + "%";
+        percentText.innerText = progress + "%";
         await new Promise(r => setTimeout(r, 300));
     }
 
-    status.innerText = "✅ تم النقل بنجاح!";
+    status.innerText = "✅ Transfer completed successfully!";
 }
 
 window.onload = function () {
@@ -372,8 +383,8 @@ window.onload = function () {
     }
 
     document.getElementById("sourceLoginBtn").onclick = () => loginSpotify("source");
-    document.getElementById("targetLoginBtn").onclick = () => loginSpotify("target");
-    document.getElementById("startTransferBtn").onclick = () => transferPlaylists();
+    document.getElementById("destLoginBtn").onclick = () => loginSpotify("target");
+    document.getElementById("transferBtn").onclick = () => transferPlaylists();
 };
 </script>
 
