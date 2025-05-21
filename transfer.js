@@ -152,6 +152,7 @@
       for (let i = 0; i < albums.length; i += 50) {
         const ids = albums.slice(i, i + 50).map(a => a.album?.id).filter(Boolean);
         await fetch("https://api.spotify.com/v1/me/albums", {
+      method: "PUT",
           method: "PUT",
           headers: {
             Authorization: "Bearer " + accessToken2,
