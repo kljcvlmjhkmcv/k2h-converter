@@ -119,7 +119,7 @@
       while (url) {
         const res = await fetch(url, { headers: { Authorization: "Bearer " + accessToken1 } });
         const data = await res.json();
-        tracks = tracks.concat(data.items);
+        if (data.items) tracks = tracks.concat(data.items);
         url = data.next;
       }
       for (let i = 0; i < tracks.length; i += 50) {
@@ -146,7 +146,7 @@
       while (url) {
         const res = await fetch(url, { headers: { Authorization: "Bearer " + accessToken1 } });
         const data = await res.json();
-        albums = albums.concat(data.items);
+        if (data.items) albums = albums.concat(data.items);
         url = data.next;
       }
       for (let i = 0; i < albums.length; i += 50) {
@@ -168,12 +168,12 @@
   async function transferArtists() {
     try {
       status.textContent = "Transferring followed artists...";
-      let artists = [];
+      let artists = []; document.getElementById('artistCount').textContent = '...';
       let url = "https://api.spotify.com/v1/me/following?type=artist&limit=50";
       while (url) {
         const res = await fetch(url, { headers: { Authorization: "Bearer " + accessToken1 } });
         const data = await res.json();
-        artists = artists.concat(data.artists.items);
+        if (data.artists?.items) artists = artists.concat(data.artists.items); document.getElementById('artistCount').textContent = artists.length;
         url = data.artists.next;
       }
       for (let i = 0; i < artists.length; i += 50) {
@@ -200,7 +200,7 @@
       while (url) {
         const res = await fetch(url, { headers: { Authorization: "Bearer " + accessToken1 } });
         const data = await res.json();
-        shows = shows.concat(data.items);
+        if (data.items) shows = shows.concat(data.items);
         url = data.next;
       }
       for (let i = 0; i < shows.length; i += 50) {
@@ -219,11 +219,13 @@
     }
   }
 
-  await transferPlaylists();
-  await transferLikedTracks();
-  await transferAlbums();
-  await transferArtists();
-  await transferPodcasts();
+  if (document.getElementById('optPlaylists').checked) await transferPlaylists();
+  if (document.getElementById('optLiked').checked) await transferLikedTracks();
+  if (document.getElementById('optAlbums').checked) await transferAlbums();
+  
+if (document.getElementById('optArtists').checked) await transferArtists();
+
+  if (document.getElementById('optPodcasts').checked) await transferPodcasts();
 
   status.textContent = "✅ All transfers complete!";
 })();
