@@ -28,10 +28,10 @@
       }
       const data = await res.json();
       const items = data.items || data.artists?.items || [];
-      result.push(...(mapper ? items.map(mapper) : items));
+      result.push(...(mapper ? items.map(mapper).filter(Boolean) : items));
       url = data.next || data.artists?.next;
     }
-    return result.filter(Boolean);
+    return result;
   }
 
   async function getUserId(token) {
@@ -49,6 +49,24 @@
 
   function getChecked(id) {
     return document.getElementById(id)?.checked;
+  }
+
+  async function uploadPlaylistImage(playlistId, imageUrl) {
+    try {
+      const res = await fetch(imageUrl);
+      const blob = await res.blob();
+      const buffer = await blob.arrayBuffer();
+      await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/images`, {
+        method: "PUT",
+        headers: {
+          Authorization: "Bearer " + accessToken2,
+          "Content-Type": "image/jpeg"
+        },
+        body: buffer
+      });
+    } catch (e) {
+      log("Failed to upload image");
+    }
   }
 
   const userId1 = await getUserId(accessToken1);
@@ -71,9 +89,8 @@
         continue;
       }
 
-      let newPl = null;
       if (pl.owner.id === userId1) {
-        const res = await fetch(`https://api.spotify.com/v1/users/${userId2}/playlists`, {
+        const newPlRes = await fetch(`https://api.spotify.com/v1/users/${userId2}/playlists`, {
           method: "POST",
           headers: {
             Authorization: "Bearer " + accessToken2,
@@ -81,7 +98,8 @@
           },
           body: JSON.stringify({ name: pl.name, public: pl.public })
         });
-        newPl = await res.json();
+        const newPl = await newPlRes.json();
+
         const uris = await fetchAllItems(`https://api.spotify.com/v1/playlists/${pl.id}/tracks?limit=100`, accessToken1, i => i.track?.uri);
         for (let i = 0; i < uris.length; i += 100) {
           await fetch(`https://api.spotify.com/v1/playlists/${newPl.id}/tracks`, {
@@ -92,6 +110,10 @@
             },
             body: JSON.stringify({ uris: uris.slice(i, i + 100) })
           });
+        }
+
+        if (pl.images?.[0]?.url) {
+          await uploadPlaylistImage(newPl.id, pl.images[0].url);
         }
       } else {
         await fetch(`https://api.spotify.com/v1/playlists/${pl.id}/followers`, {
@@ -105,12 +127,12 @@
     }
   }
 
-  async function transferShows() {
-    if (!getChecked("chkShows")) return;
-    status.textContent = "Transferring followed shows...";
-    const ids = await fetchAllItems("https://api.spotify.com/v1/me/shows?limit=50", accessToken1, i => i.show?.id);
+  async function transferLikedSongs() {
+    if (!getChecked("chkLiked")) return;
+    status.textContent = "Transferring liked songs...";
+    const ids = await fetchAllItems("https://api.spotify.com/v1/me/tracks?limit=50", accessToken1, i => i.track?.id);
     for (let i = 0; i < ids.length; i += 50) {
-      await fetch("https://api.spotify.com/v1/me/shows", {
+      await fetch("https://api.spotify.com/v1/me/tracks", {
         method: "PUT",
         headers: {
           Authorization: "Bearer " + accessToken2,
@@ -122,7 +144,7 @@
   }
 
   await transferPlaylists();
-  await transferShows();
+  await transferLikedSongs();
 
   status.textContent = "✅ Done!";
 })();
