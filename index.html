@@ -26,19 +26,15 @@
     }
     h1 {
       text-align: center;
-      margin-bottom: 16px;
-    }
-    .checkbox-group {
-      margin-bottom: 20px;
     }
     label {
       display: block;
-      margin: 6px 0;
+      margin-top: 12px;
     }
     button {
       width: 100%;
       padding: 12px;
-      margin-top: 12px;
+      margin-top: 16px;
       background-color: #1DB954;
       color: #000;
       border: none;
@@ -46,38 +42,34 @@
       font-weight: 600;
       cursor: pointer;
     }
+    .info {
+      font-size: 0.85rem;
+      color: #ccc;
+      margin-top: 8px;
+    }
     progress {
       width: 100%;
       height: 12px;
-      border-radius: 6px;
-    }
-    .info {
-      text-align: center;
-      font-size: 0.9rem;
-      color: #aaa;
-      margin-top: 6px;
+      margin-top: 12px;
     }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>SpotMyPlaylist</h1>
-    <div class="checkbox-group">
-      <label><input type="checkbox" id="chkPlaylists" checked/> Playlists</label>
-      <label><input type="checkbox" id="chkLiked" checked/> Liked Songs</label>
-      <label><input type="checkbox" id="chkAlbums" checked/> Albums</label>
-      <label><input type="checkbox" id="chkArtists" checked/> Followed Artists</label>
-      <label><input type="checkbox" id="chkShows" checked/> Followed Podcasts</label>
-    </div>
 
-    <div>
-      <button id="sourceLoginBtn">Login as Source Account</button>
-      <button id="destLoginBtn">Login as Destination Account</button>
-      <button id="transferBtn" disabled>Transfer Selected</button>
-    </div>
+    <label><input type="checkbox" id="chkPlaylists" checked /> Playlists <span id="countPlaylists">(0)</span></label>
+    <label><input type="checkbox" id="chkLiked" checked /> Liked Songs <span id="countLiked">(0)</span></label>
+    <label><input type="checkbox" id="chkAlbums" checked /> Albums <span id="countAlbums">(0)</span></label>
+    <label><input type="checkbox" id="chkArtists" checked /> Followed Artists <span id="countArtists">(0)</span></label>
+    <label><input type="checkbox" id="chkShows" checked /> Podcasts <span id="countShows">(0)</span></label>
+
+    <button id="sourceLoginBtn">Login as Source</button>
+    <button id="destLoginBtn">Login as Destination</button>
+    <button id="transferBtn" disabled>Start Transfer</button>
 
     <div class="info" id="transferStatus">Waiting for login...</div>
-    <progress id="transferProgressBar" max="100" value="0"></progress>
+    <progress id="transferProgressBar" value="0" max="100"></progress>
     <div class="info" id="transferPercentage">0%</div>
   </div>
 
@@ -142,9 +134,32 @@
         if (label === "source") accessToken1 = data.access_token;
         else accessToken2 = data.access_token;
         updateStatus(label, true);
-        checkTransferReady();
+        checkReady();
         window.history.replaceState({}, document.title, "/");
         window.location.reload();
+      }
+    }
+
+    async function fetchCount(endpoint, token, label, path = "items") {
+      let count = 0;
+      let url = endpoint;
+      while (url) {
+        const res = await fetch(url, { headers: { Authorization: "Bearer " + token } });
+        const data = await res.json();
+        const items = data.items || data.artists?.items || [];
+        count += items.length;
+        url = data.next || data.artists?.next;
+      }
+      document.getElementById(label).textContent = `(${count})`;
+    }
+
+    async function showCounts() {
+      if (accessToken1) {
+        await fetchCount("https://api.spotify.com/v1/me/playlists?limit=50", accessToken1, "countPlaylists");
+        await fetchCount("https://api.spotify.com/v1/me/tracks?limit=50", accessToken1, "countLiked");
+        await fetchCount("https://api.spotify.com/v1/me/albums?limit=50", accessToken1, "countAlbums");
+        await fetchCount("https://api.spotify.com/v1/me/following?type=artist&limit=50", accessToken1, "countArtists");
+        await fetchCount("https://api.spotify.com/v1/me/shows?limit=50", accessToken1, "countShows");
       }
     }
 
@@ -153,12 +168,11 @@
       if (btn && connected) btn.textContent = label + " ✅";
     }
 
-    function checkTransferReady() {
+    function checkReady() {
       accessToken1 = localStorage.getItem("access_token_source");
       accessToken2 = localStorage.getItem("access_token_target");
-      if (accessToken1 && accessToken2) {
-        document.getElementById("transferBtn").disabled = false;
-      }
+      if (accessToken1) showCounts();
+      if (accessToken1 && accessToken2) document.getElementById("transferBtn").disabled = false;
     }
 
     window.onload = () => {
@@ -170,14 +184,14 @@
         const label = state.split("_")[0];
         exchangeToken(code, label);
       } else {
-        checkTransferReady();
+        checkReady();
       }
 
       document.getElementById("sourceLoginBtn").onclick = () => loginSpotify("source");
       document.getElementById("destLoginBtn").onclick = () => loginSpotify("target");
       document.getElementById("transferBtn").onclick = () => {
         const script = document.createElement("script");
-        script.src = "transfer_pro.js";
+        script.src = "transfer_final.js";
         document.body.appendChild(script);
       };
     };
