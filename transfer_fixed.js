@@ -86,7 +86,7 @@
   async function transferArtists() {
     status.textContent = "Transferring artists...";
     const artistIds = await fetchAllItems("https://api.spotify.com/v1/me/following?type=artist&limit=50", accessToken1, a => a.id);
-    document.getElementById("artistCount").textContent = artistIds.length;
+    // removed artistCount update
     for (let i = 0; i < artistIds.length; i += 50) {
       await fetch("https://api.spotify.com/v1/me/following?type=artist", {
         method: "PUT",
