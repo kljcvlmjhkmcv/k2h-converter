@@ -34,6 +34,24 @@
     return result;
   }
 
+  async function uploadPlaylistImage(playlistId, imageUrl) {
+    try {
+      const imageBlob = await fetch(imageUrl).then(res => res.blob());
+      const arrayBuffer = await imageBlob.arrayBuffer();
+      const base64String = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/images`, {
+        method: "PUT",
+        headers: {
+          Authorization: "Bearer " + accessToken2,
+          "Content-Type": "image/jpeg"
+        },
+        body: base64String
+      });
+    } catch (e) {
+      log("Failed to upload image: " + e.message);
+    }
+  }
+
   async function getUserId(token) {
     const res = await fetch("https://api.spotify.com/v1/me", {
       headers: { Authorization: "Bearer " + token }
@@ -49,24 +67,6 @@
 
   function getChecked(id) {
     return document.getElementById(id)?.checked;
-  }
-
-  async function uploadPlaylistImage(playlistId, imageUrl) {
-    try {
-      const res = await fetch(imageUrl);
-      const blob = await res.blob();
-      const buffer = await blob.arrayBuffer();
-      await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/images`, {
-        method: "PUT",
-        headers: {
-          Authorization: "Bearer " + accessToken2,
-          "Content-Type": "image/jpeg"
-        },
-        body: buffer
-      });
-    } catch (e) {
-      log("Failed to upload image");
-    }
   }
 
   const userId1 = await getUserId(accessToken1);
@@ -130,15 +130,15 @@
   async function transferLikedSongs() {
     if (!getChecked("chkLiked")) return;
     status.textContent = "Transferring liked songs...";
-    const ids = await fetchAllItems("https://api.spotify.com/v1/me/tracks?limit=50", accessToken1, i => i.track?.id);
-    for (let i = 0; i < ids.length; i += 50) {
+    const tracks = await fetchAllItems("https://api.spotify.com/v1/me/tracks?limit=50", accessToken1, i => i.track?.id);
+    for (let i = 0; i < tracks.length; i += 50) {
       await fetch("https://api.spotify.com/v1/me/tracks", {
         method: "PUT",
         headers: {
           Authorization: "Bearer " + accessToken2,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ ids: ids.slice(i, i + 50) })
+        body: JSON.stringify({ ids: tracks.slice(i, i + 50) })
       });
     }
   }
