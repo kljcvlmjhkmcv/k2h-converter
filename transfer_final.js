@@ -10,11 +10,11 @@
     const errorLog = document.getElementById("errorLog") || (() => {
       const el = document.createElement("div");
       el.id = "errorLog";
-      el.style = "color: #ff6b6b; font-size: 0.8rem; margin-top: 16px; max-height: 120px; overflow-y: auto;";
+      el.style = "color: #ff6b6b; font-size: 0.8rem; margin-top: 16px; max-height: 200px; overflow-y: auto;";
       document.querySelector(".card").appendChild(el);
       return el;
     })();
-    errorLog.innerHTML += `<div>❌ ${msg}</div>`;
+    errorLog.innerHTML += `<div>${msg}</div>`;
   };
 
   async function fetchAllItems(url, token, mapper) {
@@ -23,7 +23,7 @@
       const res = await fetch(url, { headers: { Authorization: "Bearer " + token } });
       if (!res.ok) {
         const text = await res.text();
-        log("Error: " + text.slice(0, 100));
+        log("Error: " + text.slice(0, 120));
         break;
       }
       const data = await res.json();
@@ -34,7 +34,7 @@
     return result;
   }
 
-  async function uploadPlaylistImage(playlistId, imageUrl) {
+  async function uploadPlaylistImage(playlistId, imageUrl, playlistName) {
     try {
       const imageBlob = await fetch(imageUrl).then(res => res.blob());
       const arrayBuffer = await imageBlob.arrayBuffer();
@@ -48,7 +48,7 @@
         body: base64String
       });
     } catch (e) {
-      log("Failed to upload image: " + e.message);
+      log(`📛 لم يتم رفع صورة البلايليست: <b>${playlistName}</b><br>🔗 <a href="${imageUrl}" target="_blank">${imageUrl}</a>`);
     }
   }
 
@@ -113,7 +113,7 @@
         }
 
         if (pl.images?.[0]?.url) {
-          await uploadPlaylistImage(newPl.id, pl.images[0].url);
+          await uploadPlaylistImage(newPl.id, pl.images[0].url, pl.name);
         }
       } else {
         await fetch(`https://api.spotify.com/v1/playlists/${pl.id}/followers`, {
@@ -127,24 +127,7 @@
     }
   }
 
-  async function transferLikedSongs() {
-    if (!getChecked("chkLiked")) return;
-    status.textContent = "Transferring liked songs...";
-    const tracks = await fetchAllItems("https://api.spotify.com/v1/me/tracks?limit=50", accessToken1, i => i.track?.id);
-    for (let i = 0; i < tracks.length; i += 50) {
-      await fetch("https://api.spotify.com/v1/me/tracks", {
-        method: "PUT",
-        headers: {
-          Authorization: "Bearer " + accessToken2,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ ids: tracks.slice(i, i + 50) })
-      });
-    }
-  }
-
   await transferPlaylists();
-  await transferLikedSongs();
 
   status.textContent = "✅ Done!";
 })();
