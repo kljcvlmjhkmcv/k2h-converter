@@ -843,6 +843,18 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
     
+    
+        .account-btn.is-loading { pointer-events:none; opacity:0.85; }
+        .account-btn.is-loading::after{
+          content:'';
+          width:16px;height:16px;
+          border:2px solid rgba(255,255,255,0.35);
+          border-top-color:white;
+          border-radius:50%;
+          display:inline-block;
+          margin-left:10px;
+          animation: spin 0.8s linear infinite;
+        }
     </style>
   <style>body { box-sizing: border-box; }</style>
 <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
@@ -1160,24 +1172,10 @@
                     const wasOpen = item.classList.contains('is-open');
                     
                     // Close all items
-                    document.querySelectorAll('.faq-item').forEach(i => {
-                        i.classList.remove('is-open');
-                    });
-                    
-                    // Open clicked item if it was closed
-                    if (!wasOpen) {
-                        item.classList.add('is-open');
-                    }
-                });
-            });
-        }
-
-        // Initialize the app
-        initApp();
-    </script><!-- INTEGRATION: AUTH SCRIPT GOES HERE -->
+                    document.querySelectorAll('.fa<!-- INTEGRATION: AUTH SCRIPT GOES HERE -->
 <script>
 const clientId = "a25ef2952efe4f039a00456c0b94544c";
-    const redirectUri = "https://www.virtualdz.store/";
+    const redirectUri = window.location.origin + "/";
     const scopes = "playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public user-library-read user-library-modify user-follow-read user-follow-modify";
 
     let accessToken1 = null;
@@ -1304,7 +1302,7 @@ function checkReady() {
 }
     }
 
-    window.onload = () => {
+    document.addEventListener("DOMContentLoaded", () => {
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
       const state = params.get("state");
@@ -1316,8 +1314,30 @@ function checkReady() {
         checkReady();
       }
 
-      document.getElementById("sourceLoginBtn").onclick = () => loginSpotify("source");
-      document.getElementById("destLoginBtn").onclick = () => loginSpotify("target");
+      document.getElementById("sourceLoginBtn").onclick = () => {
+        const b=document.getElementById("sourceLoginBtn");
+        const t=document.getElementById("sourceLoginText");
+        b.classList.add("is-loading");
+        if(t) t.textContent="Opening Spotify…";
+        loginSpotify("source");
+      };
+      document.getElementById("destLoginBtn").onclick = () => {
+        const b=document.getElementById("destLoginBtn");
+        const t=document.getElementById("destLoginText");
+        b.classList.add("is-loading");
+        if(t) t.textContent="Opening Spotify…";
+        loginSpotify("target");
+      };
+      document.getElementById("transferBtn").onclick = () => {
+        const btn = document.getElementById("transferBtn");
+        btn.classList.add("is-loading");
+        setPill("is-active", "Transferring");
+        const script = document.createElement("script");
+        script.src = "transfer_final.js";
+        document.body.appendChild(script);
+      };
+    });
+</script>=> loginSpotify("target");
       document.getElementById("transferBtn").onclick = () => {
         const btn = document.getElementById("transferBtn");
         btn.classList.add("is-loading");
