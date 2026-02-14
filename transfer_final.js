@@ -6,19 +6,41 @@
   const bar = document.getElementById("transferProgressBar");
   const percent = document.getElementById("transferPercentage");
 
+
+  function setPill(state, text) {
+    const pill = document.getElementById("statusPill");
+    if (!pill) return;
+    pill.classList.remove("is-idle","is-active","is-success","is-error");
+    pill.classList.add(state);
+    const spans = pill.querySelectorAll("span");
+    if (spans.length >= 2 && text) spans[1].textContent = text;
+  }
+
+  function setLoading(isLoading) {
+    const btn = document.getElementById("transferBtn");
+    if (!btn) return;
+    btn.classList.toggle("is-loading", isLoading);
+  }
+
+
   const log = (msg) => {
-    const errorLog = document.getElementById("errorLog") || (() => {
-      const el = document.createElement("div");
-      el.id = "errorLog";
-      el.style = "color: #ff6b6b; font-size: 0.8rem; margin-top: 16px; max-height: 120px; overflow-y: auto;";
-      document.querySelector(".card").appendChild(el);
-      return el;
-    })();
-    errorLog.innerHTML += `<div>${msg}</div>`;
+    const errorLog = document.getElementById("errorLog");
+    if (!errorLog) return;
+    const div = document.createElement("div");
+    div.className = "error-item";
+    div.innerHTML = msg;
+    errorLog.appendChild(div);
   };
+
+const errorLog = document.getElementById("errorLog");
+  if (errorLog) errorLog.innerHTML = "";
+  setPill("is-active", "Working");
+  setLoading(true);
 
   if (!accessToken1 || !accessToken2) {
     log("Missing tokens.");
+    setPill("is-error", "Missing tokens");
+    setLoading(false);
     return;
   }
 
@@ -174,4 +196,6 @@
   await transferArtists();
 
   status.textContent = "✅ All transfers complete!";
+  setPill("is-success", "Done");
+  setLoading(false);
 })();
